@@ -307,13 +307,33 @@ The `DroneController` class and also the `DroneHandle` class, which may be an en
 The following properties are specific to `DroneController`
 
     isInMissileRange(droneHandle: DroneHandle): Boolean
-	isConstructing: Boolean
+	  isConstructing: Boolean
     availableStorage: Int
     availableFactories: Int
     storedMinerals: Seq[MineralCrystalHandle]
     dronesInSight: Set[DroneHandle]
     worldSize: Rectangle
     orientation: Double
+
+### `DroneSpec`
+
+Used to specify how many of each type of module a drone has.
+`DroneSpec` has the following parameters, and also class members of the same name:
+
+* `storageModules` can be used to store minerals. More modules allow for storing more/larger minerals.
+* `missileBatteries` allow the drone to shoot homing missiles. More modules increase the numbers of missiles shot.
+* `refineries` allow the drone to convert minerals into resources. More modules allows for processing more/larger minerals.
+* `manipulators` allow the drone to construct new drones. More modules increase construction speed.
+* `engines` increase movement speed. The movement speed is determined by the *relative* number of engines. (so other modules effectively decrease movement speed)
+* `shieldGenerators` give the drone an additional 7 hitpoints each. Shields regenerate over time.
+
+Currently, the total number of modules is limited to 10, but this restriction will likely be lifted in the future.
+
+### `MineralCrystalHandle`
+
+Represents a mineral crystal.
+Each mineral crystal has a `size`, and to harvest a mineral you need at least `size` free storage modules.
+The class also has a `position` and a `harvested` method that will tell you whether the mineral crystal has already been harvested.
 
 ### `Vector2`
 

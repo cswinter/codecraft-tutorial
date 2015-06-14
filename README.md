@@ -289,7 +289,7 @@ The following methods issue commands to your drone:
     moveTo(mineralCrystal: MineralCrystal)
     moveTo(position: Vector2)
     harvest(mineralCrystal: MineralCrystal)
-    depositMinerals(otherDrone: Drone)
+    giveMineralsTo(otherDrone: Drone)
     buildDrone(spec: DroneSpec, controller: DroneController)
     processMineral(mineralCrystal: MineralCrystal)
     shootMissiles(target: Drone)

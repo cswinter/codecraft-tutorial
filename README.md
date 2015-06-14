@@ -6,7 +6,7 @@ If you encounter a bug, or have a question, or want to give feedback you can pos
 
 ## Basics
 
-To get things set up, you need to create a new project in your favourite IDE (or whatever else you use) which imports [codecraft.jar](INSERT HYPERLINK HERE).
+To get things set up, you need to create a new project in your favourite IDE (or whatever else you use) which imports [codecraft.jar](depositMineral://www.dropbox.com/s/axfrjijyuv7v1kg/codecraft-0.1.0.jar?dl=0).
 Alternatively, this repo also contains bare bones templates for Scala and Java in the folders scala-template and java-template.
 They can be run with from the command line with `sbt run` and `javac *.java -cp codecraft-0.1.0.jar && java -cp '.;codecraft-0.1.0.jar' Main` respectively.
 

@@ -144,19 +144,19 @@ class HarvesterController(val mothership: DroneController) extends DroneControll
   }
 
   // when we see a mineral crystal, stop scouting and move towards it
-  override def onMineralEntersVision(mineralCrystal: MineralCrystalHandle): Unit = {
+  override def onMineralEntersVision(mineralCrystal: MineralCrystal): Unit = {
     moveTo(mineralCrystal)
     isScouting = false
   }
 
   // once we arrive at the mineral, harvest it and bring it back to the mothership
-  override def onArrivesAtMineral(mineral: MineralCrystalHandle): Unit = {
+  override def onArrivesAtMineral(mineral: MineralCrystal): Unit = {
     harvest(mineral)
     moveTo(mothership)
   }
 
   // once we arrive at the mothership, deposit the crystal and start scouting again
-  override def onArrivesAtDrone(drone: DroneHandle): Unit = {
+  override def onArrivesAtDrone(drone: Drone): Unit = {
     giveMineralsTo(mothership)
     isScouting = true
   }
@@ -182,7 +182,7 @@ class HarvesterController extends JDroneController {
   }
 
   // whe we see a mineral crystal, stop scouting and move towards it
-  @Override public void onMineralEntersVision(MineralCrystalHandle mineral) {
+  @Override public void onMineralEntersVision(MineralCrystal mineral) {
     if (isScouting) {
       moveTo(mineral);
       isScouting = false;
@@ -190,13 +190,13 @@ class HarvesterController extends JDroneController {
   }
 
   // once we arrive at the mineral, harvest it and bring it back to the mothership
-  @Override public void onArrivesAtMineral(MineralCrystalHandle mineral) {
+  @Override public void onArrivesAtMineral(MineralCrystal mineral) {
     harvest(mineral);
     moveTo(mothership);
   }
 
   // once we arrive at the mothership, deposit the crystal and switch back to scouting mode
-  @Override public void onArrivesAtDrone(DroneHandle drone) {
+  @Override public void onArrivesAtDrone(Drone drone) {
     giveMineralsTo(mothership);
     isScouting = true;
   }
@@ -243,10 +243,10 @@ After you have built some harvesters, you will want to start production on a dif
 The HarvesterSpec won't do for this, you will need to define another spec without `storageModules` which instead has one or more `missileBatteries`, and maybe even `shieldGenerators` (if you are using Java, those correspond to the 2nd and 6th argument of the DroneSpec constructor respectively).
 Another controller will be required as well, and you might find the following methods useful:
 
-* The `DroneController` method `dronesInSight` returns a `Set` of all `DroneHandle`s which can be seen by this drone controller
-* The `DroneHandle` class has a method `isEnemy` which tells you whether that drone is an enemy
-* The `DroneController` method `isInMissileRange(target: DroneHandle)` can be used to check whether some drone is within the range of your missiles
-* The `DroneController` method `shootMissiles(target: DroneHandle)` will fire all your missiles at the drone `target`
+* The `DroneController` method `dronesInSight` returns a `Set` of all `Drone`s which can be seen by this drone controller
+* The `Drone` class has a method `isEnemy` which tells you whether that drone is an enemy
+* The `DroneController` method `isInMissileRange(target: Drone)` can be used to check whether some drone is within the range of your missiles
+* The `DroneController` method `shootMissiles(target: Drone)` will fire all your missiles at the drone `target`
 * If you are using Java: method parentheses aren't optional in Java, so you will need to write e.g. `dronesInSight()` and `isEnemy()`
 
 If you don't quite manage to get all of this to work, you can check out the scala-solution and java-solution directories in this repo, which contain a full implementation of everything described in this tutorial.
@@ -273,11 +273,11 @@ If you are using Java, you should use the `JDroneController` class instead, whic
     onSpawn()
     onDeath()
     onTick()
-    onMineralEntersVision(mineralCrystal: MineralCrystalHandle)
-    onDroneEntersVision(drone: DroneHandle)
+    onMineralEntersVision(mineralCrystal: MineralCrystal)
+    onDroneEntersVision(drone: Drone)
     onArrivesAtPosition()
-    onArrivesAtMineral(mineralCrystal: MineralCrystalHandle)
-    onArrivesAtDrone(drone: DroneHandle)
+    onArrivesAtMineral(mineralCrystal: MineralCrystal)
+    onArrivesAtDrone(drone: Drone)
 
 On every timestep, `onTick` will be called after all the other methods. Those may be called in any order.
 
@@ -285,16 +285,16 @@ The following methods issue commands to your drone:
 
     moveInDirection(directionVector: Vector2)
     moveInDirection(direction: Double)
-    moveTo(otherDrone: DroneHandle)
-    moveTo(mineralCrystal: MineralCrystalHandle)
+    moveTo(otherDrone: Drone)
+    moveTo(mineralCrystal: MineralCrystal)
     moveTo(position: Vector2)
-    harvest(mineralCrystal: MineralCrystalHandle)
-    depositMinerals(otherDrone: DroneHandle)
+    harvest(mineralCrystal: MineralCrystal)
+    depositMinerals(otherDrone: Drone)
     buildDrone(spec: DroneSpec, controller: DroneController)
-    processMineral(mineralCrystal: MineralCrystalHandle)
-    shootMissiles(target: DroneHandle)
+    processMineral(mineralCrystal: MineralCrystal)
+    shootMissiles(target: Drone)
 
-The `DroneController` class and also the `DroneHandle` class, which may be an enemy drone, expose various properties:
+The `DroneController` class and also the `Drone` class, which may be an enemy drone, expose various properties:
 
     position: Vector2
     weaponsCooldown: Int
@@ -306,12 +306,12 @@ The `DroneController` class and also the `DroneHandle` class, which may be an en
 
 The following properties are specific to `DroneController`
 
-    isInMissileRange(droneHandle: DroneHandle): Boolean
+    isInMissileRange(droneHandle: Drone): Boolean
 	  isConstructing: Boolean
     availableStorage: Int
     availableFactories: Int
-    storedMinerals: Seq[MineralCrystalHandle]
-    dronesInSight: Set[DroneHandle]
+    storedMinerals: Seq[MineralCrystal]
+    dronesInSight: Set[Drone]
     worldSize: Rectangle
     orientation: Double
 
@@ -323,13 +323,13 @@ Used to specify how many of each type of module a drone has.
 * `storageModules` can be used to store minerals. More modules allow for storing more/larger minerals.
 * `missileBatteries` allow the drone to shoot homing missiles. More modules increase the numbers of missiles shot.
 * `refineries` allow the drone to convert minerals into resources. More modules allows for processing more/larger minerals.
-* `manipulators` allow the drone to construct new drones. More modules increase construction speed.
+* `constructors` allow the drone to construct new drones. More modules increase construction speed.
 * `engines` increase movement speed. The movement speed is determined by the *relative* number of engines. (so other modules effectively decrease movement speed)
 * `shieldGenerators` give the drone an additional 7 hitpoints each. Shields regenerate over time.
 
 Currently, the total number of modules is limited to 10, but this restriction will likely be lifted in the future.
 
-### `MineralCrystalHandle`
+### `MineralCrystal`
 
 Represents a mineral crystal.
 Each mineral crystal has a `size`, and to harvest a mineral you need at least `size` free storage modules.

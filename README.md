@@ -68,37 +68,37 @@ Ok, so let's actually tell our mothership to do something.
 The first thing we want is to build a new drone that will scout the map, harvest minerals and bring them back to the mothership.
 To do so, we override the `DroneController.onSpawn` method inside the `Mothership` class.
 This method is called automatically by the game engine when our drone first spawns.
-Inside `onSpawn`, we call `buildDrone(droneSpec, controller)`. This method take two arguments:
+Inside `onSpawn`, we call `buildDrone(controller, droneSpec)`. This method take two arguments:
 
-* `droneSpec` specifies what modules our new drone will have. (in this case, we want two storage modules which will allow us to harvest mineral crystals)
 * `controller` is another DroneController that will govern the behaviour of our new Drone.
+* `droneSpec` is a DroneSpec object which specifies what modules our new drone will have. (in this case, we want two storage modules which will allow us to harvest and transport resources)
 
-Add the following code to your Motership class:
+In Scala, you can use a simpler variant of buildDrone that allows you to directly specify with modules using named parameters instead of creating a DroneSpec object.
+Add the following code to your Mothership class:
 
 ```scala
-override def onSpawn(): Unit = {
-  val harvesterSpec = new DroneSpec(storageModules = 2)
-  buildDrone(harvesterSpec, new HarvesterController)
-}
+override def onSpawn() =
+  buildDrone(new Harvester, storageModules = 2)
 ```
 ```java
 @Override public void onSpawn() {
-  DroneSpec harvesterSpec = new DroneSpec(2, 0, 0, 0, 0, 0);
-  buildDrone(harvesterSpec, new HarvesterController());
+  DroneSpec harvesterSpec = new DroneSpec().withStorageModules(2);
+  buildDrone(new Harvester(), harvesterSpec);
 }
 ```
 
-Of course we still need to implement the `HarvesterController`, so create a new file with the following contents:
+Of course we still need to implement the `Harvester`, so create a new file with the following contents:
 
 ```scala
 import cwinter.codecraft.core.api._
 import scala.util.Random
     
-class HarvesterController extends DroneController {
+class Harvester extends DroneController {
   override def onTick(): Unit = {
-    if (Random.nextInt(30) == 0) {
-      val newDirection = 2 * math.Pi * Random.nextDouble()
-      moveInDirection(newDirection)
+    if (!isMoving) {
+      val randomDirection = Vector2(2 * math.Pi * Random.nextDouble())
+      val targetPosition = position + 500 * randomDirection
+      moveTo(targetPosition)
     }
   }
 }
@@ -107,98 +107,90 @@ class HarvesterController extends DroneController {
 import cwinter.codecraft.core.api.*;
 import java.util.Random;
 
-class HarvesterController extends JDroneController {
+class Harvester extends JDroneController {
   static Random rng = new Random();
 
   @Override public void onTick() {
-    if (rng.nextInt(30) == 0) {
-      Double newDirection = 2 * Math.PI * rng.nextDouble();
-      moveInDirection(newDirection);
+    if (!isMoving()) {
+      Vector2 randomDirection = new Vector2(2 * Math.PI * rng.nextDouble());
+      Vector2 targetPosition = position.plus(randomDirection.times(500));
+      moveTo(targetPosition);
     }
   }
 }
 ```
-    
+
 This time, we override the `onTick` method which is called on every timestep.
-On random timesteps, with a chance of 1 in 30, we give the drone a command to move into a new random direction using the `moveInDirection` method.
-You should now run the program again and verify that, in fact, your mothership will construct a new drone which moves randomly across the map.
+First, we test whether the drone is currently moving using the isMoving property.
+If this is not the case, we give the drone a command to move into a new random direction for 100 timesteps using the `moveInDirection` method.
+You should now run the program again and verify that your mothership constructs a new drone which moves randomly across the map.
 
 ## Harvesting resources
 
 We still want to harvest resources and return them to the mothership.
 For this, we override the `onMineralEntersVision` method which is called whenever a mineral crystal enters the sight radius of our drone.
 When this happens, we want to stop scouting and move towards the mineral crystal.
-Once we have arrived, the `onArrivesAtMineral` method is called, where we give orders to harvest the mineral and return to the mothership.
-Once this happens, the `onArrivesAtDrone` method will be called where we give orders to deposit the mineral crystal and go back into scouting mode.
+Once we have arrived, the `onArrivesAtMineral` method is called, where we give orders to harvest the mineral.
+We also modify our code in the `onTick` method to send the drone back to the mothership when it's storage is full.
+Once the drone arrives there, the `onArrivesAtDrone` method will be called where we give orders to deposit the mineral crystals.
 The HarvesterController class should now look like this:
 
 ```scala
-class HarvesterController(val mothership: DroneController) extends DroneController {
-  private var isScouting = true
-
+class Harvester(mothership: DroneController) extends DroneController {
   override def onTick(): Unit = {
-    if (isScouting && Random.nextInt(30) == 0) {
-      val newDirection = 2 * math.PI * Random.nextDouble()
-      moveInDirection(newDirection)
+    if (!isMoving && !isHarvesting) {
+      if (availableStorage == 0) moveTo(mothership)
+      else {
+        val randomDirection = Vector2(2 * math.Pi * Random.nextDouble())
+        val targetPosition = position + 500 * randomDirection
+        moveTo(targetPosition)
+      }
     }
   }
 
-  // when we see a mineral crystal, stop scouting and move towards it
-  override def onMineralEntersVision(mineralCrystal: MineralCrystal): Unit = {
-    moveTo(mineralCrystal)
-    isScouting = false
-  }
+  override def onMineralEntersVision(mineral: MineralCrystal) =
+    if (availableStorage > 0) moveTo(mineral)
 
-  // once we arrive at the mineral, harvest it and bring it back to the mothership
-  override def onArrivesAtMineral(mineral: MineralCrystal): Unit = {
-    harvest(mineral)
-    moveTo(mothership)
-  }
+  override def onArrivesAtMineral(mineral: MineralCrystal) = harvest(mineral)
 
-  // once we arrive at the mothership, deposit the crystal and start scouting again
-  override def onArrivesAtDrone(drone: Drone): Unit = {
-    giveMineralsTo(mothership)
-    isScouting = true
-  }
+  override def onArrivesAtDrone(drone: Drone) = giveResourcesTo(drone)
 }
 ```
 ```java
-class HarvesterController extends JDroneController {
+class Harvester extends JDroneController {
   static Random rng = new Random();
-  private Boolean isScouting = true;
   private JDroneController mothership;
 
 
-  public HarvesterController(JDroneController mothership) {
+  public Harvester(JDroneController mothership) {
     this.mothership = mothership;
   }
 
 
   @Override public void onTick() {
-    if (isScouting && rng.nextInt(30) == 0) {
-      Double newDirection = 2 * Math.PI * rng.nextDouble();
-      moveInDirection(newDirection);
+    if (!isMoving() && !isHarvesting()) {
+      if (availableStorage() == 0) moveTo(mothership);
+      else {
+        Double randomDirection = Vector2(2 * Math.PI * rng.nextDouble());
+        Double targetPosition = position.plus(randomDirection.times(500));
+        moveTo(targetPosition);
+      }
     }
   }
 
   // whe we see a mineral crystal, stop scouting and move towards it
   @Override public void onMineralEntersVision(MineralCrystal mineral) {
-    if (isScouting) {
-      moveTo(mineral);
-      isScouting = false;
-    }
+    if (availableStorage() > 0) moveTo(mineral);
   }
 
   // once we arrive at the mineral, harvest it and bring it back to the mothership
   @Override public void onArrivesAtMineral(MineralCrystal mineral) {
     harvest(mineral);
-    moveTo(mothership);
   }
 
   // once we arrive at the mothership, deposit the crystal and switch back to scouting mode
   @Override public void onArrivesAtDrone(Drone drone) {
-    giveMineralsTo(mothership);
-    isScouting = true;
+    giveResourcesTo(mothership);
   }
 }
 ```
@@ -210,24 +202,19 @@ The `Mothership` class now looks like this:
 
 ```scala
 class Mothership extends DroneController {
-  final val HarvesterSpec = new DroneSpec(storageModules = 2)
-    
-  override def onTick(): Unit = {
-    if (!isConstructing) {
-      buildDrone(HarvesterSpec, new Harvester(this))
-    }
-  }
+  override def onTick(): Unit =
+    if (!isConstructing) buildDrone(new Harvester(this), storageModules = 2)
 }
 ```
 ```java
 import cwinter.codecraft.core.api.*;
 
 class Mothership extends JDroneController {
-  static final DroneSpec HARVESTER_SPEC = new DroneSpec(2, 0, 0, 0, 0, 0);
+  static final DroneSpec HARVESTER_SPEC = new DroneSpec().withStorageModules(2);
 
   @Override public void onTick() {
     if (!isConstructing()) {
-      buildDrone(HARVESTER_SPEC, new HarvesterController(this));
+      buildDrone(new Harvester(this), HARVESTER_SPEC);
     }
   }
 }
@@ -246,17 +233,19 @@ Another controller will be required as well, and you might find the following me
 * The `DroneController` method `dronesInSight` returns a `Set` of all `Drone`s which can be seen by this drone controller
 * The `Drone` class has a method `isEnemy` which tells you whether that drone is an enemy
 * The `DroneController` method `isInMissileRange(target: Drone)` can be used to check whether some drone is within the range of your missiles
-* The `DroneController` method `shootMissiles(target: Drone)` will fire all your missiles at the drone `target`
+* The `DroneController` method `fireMissilesAt(target: Drone)` will fire all your missiles at the drone `target`
 * If you are using Java: method parentheses aren't optional in Java, so you will need to write e.g. `dronesInSight()` and `isEnemy()`
 
 If you don't quite manage to get all of this to work, you can check out the scala-solution and java-solution directories in this repo, which contain a full implementation of everything described in this tutorial.
 If you want to go even further, check out the next section which gives an overview of all the other parts of the API which haven't been covered yet.
-If you manage beat all the levels and want your AI included in the next release, send me a link to your code at codecraft@gmail.com.
+If you write an AI that is different from those in the current levels, please send me a link to your code at codecraft@gmail.com and I'll include in the next release.
 
 
-## API overview
+## What to do next
 
-I plan to have comprehensive documentation of the API eventually, for now I will just give a general description of how everything is organized and list the names of all of the methods of interest. It shouldn't be too hard to figure out what most of them do.
+Hopefully this tutorial has succeded in giving you a good understanding of what CodeCraft is about and how to use it.
+If you want to continue building out your AI, you can get answers to any questions you have from the [comprehensive documentation](http://www.codecraftgame.org/docs/api/index.html) or [fellow CodeCraft users](http://www.codecraftgame.org/community).
+In addtiion to that, this section gives a quick overview of the most useful parts of the API.
 
 ### `TheGameMaster`
 To configure and start the game, you use `TheGameMaster` object.
@@ -266,101 +255,36 @@ The game automatically records replays of all games in the folder `~/.codecraft/
 You can run the last recorded replay using `runLastReplay` and run the replay with a specific filename using `runReplay`.
 
 ### `DroneController`
-Almost all interactions with the game world will go through this class.
+Almost all interactions with the game world goes through this class.
 If you are using Java, you should use the `JDroneController` class instead, which is almost identical but returns Java collections rather than their Scala counterparts.
-`DroneController` has the following methods which you can override to be informed of various events:
+`DroneController` has three different kinds of methods:
 
-    onSpawn()
-    onDeath()
-    onTick()
-    onMineralEntersVision(mineralCrystal: MineralCrystal)
-    onDroneEntersVision(drone: Drone)
-    onArrivesAtPosition()
-    onArrivesAtMineral(mineralCrystal: MineralCrystal)
-    onArrivesAtDrone(drone: Drone)
+* Event handlers such as `onSpawn` and `onDroneEntersVision`. These are automatically called by the game on specific events and you can override them to respond to these events.
+* Commands such as `moveTo` and `buildDrone`. You can call these methods to make your drones perform various actions.
+* Properties such as `position` and `hitpoints` which allow you to query the current state of the drone. 
 
-On every timestep, `onTick` will be called after all the other methods. Those may be called in any order.
-
-The following methods issue commands to your drone:
-
-    moveInDirection(directionVector: Vector2)
-    moveInDirection(direction: Double)
-    moveTo(otherDrone: Drone)
-    moveTo(mineralCrystal: MineralCrystal)
-    moveTo(position: Vector2)
-    harvest(mineralCrystal: MineralCrystal)
-    giveMineralsTo(otherDrone: Drone)
-    buildDrone(spec: DroneSpec, controller: DroneController)
-    processMineral(mineralCrystal: MineralCrystal)
-    shootMissiles(target: Drone)
-
-The `DroneController` class and also the `Drone` class, which may be an enemy drone, expose various properties:
-
-    position: Vector2
-    weaponsCooldown: Int
-    isVisible: Boolean
-    spec: DroneSpec
-    player: Player
-    hitpoints: Int
-    isEnemy: Boolean
-
-The following properties are specific to `DroneController`
-
-    isInMissileRange(droneHandle: Drone): Boolean
-	  isConstructing: Boolean
-    availableStorage: Int
-    availableFactories: Int
-    storedMinerals: Seq[MineralCrystal]
-    dronesInSight: Set[Drone]
-    worldSize: Rectangle
-    orientation: Double
-
-### `DroneSpec`
-
-Used to specify how many of each type of module a drone has.
-`DroneSpec` has the following parameters, and also class members of the same name:
-
-* `storageModules` can be used to store minerals. More modules allow for storing more/larger minerals.
-* `missileBatteries` allow the drone to shoot homing missiles. More modules increase the numbers of missiles shot.
-* `refineries` allow the drone to convert minerals into resources. More modules allows for processing more/larger minerals.
-* `constructors` allow the drone to construct new drones. More modules increase construction speed.
-* `engines` increase movement speed. The movement speed is determined by the *relative* number of engines. (so other modules effectively decrease movement speed)
-* `shieldGenerators` give the drone an additional 7 hitpoints each. Shields regenerate over time.
-
-Currently, the total number of modules is limited to 10, but this restriction will likely be lifted in the future.
-
-### `MineralCrystal`
-
-Represents a mineral crystal.
-Each mineral crystal has a `size`, and to harvest a mineral you need at least `size` free storage modules.
-The class also has a `position` and a `harvested` method that will tell you whether the mineral crystal has already been harvested.
+You can find a complete description of all of them in the [API reference][API#DroneController].
+In some methods (e.g. `onDroneEntersVision`) you are given a [`Drone`][API#Drone] object.
+Since this could reference an enemy drone, it only exposes a subset of the properties and none of the event and command methods.
 
 ### `Vector2`
-
-CodeCraft uses the immutable Vector2 class for everything that is represented by a 2D vector, such as the position of the Drones. (the world can always use another broken vector implementation)
-
-There are two ways to create vectors: `Vector2(x, y)` will create a vector with components x and y. `Vector2(a)` will create a unit vector rotated by an angle of a radians. Addition, subtraction, multiplication and division work as expected:
-
-    > 2 * Vector2(0.5, 0) + Vector2(0, 10) / 10 - Vector2(10, 0)
-    res0: Vector2 = Vector2(-9, 1)
-
-If you are using Java, you can create vectors with `new Vector2(x, y)` and you can use the methods `plus`, `times` and `minus` in place of the symbolic variants.
-
-Additionally, you may find the following methods on `Vector2` useful:
-
-    dot(rhs: Vector2): Double
-    length: Double
-    orientation: Double
-    lengthSquared: Double
-    normalized: Vector2
-    rotated(angle: Double): Vector2
+`Vector2` is an immutable 2D vector and used throughout CodeCraft.
+It defines various methods and operators to perform e.g. vector addition, scalar multiplication and compute it's length.
+Details can be found in the [API reference][API#Vector2].
 
 ### `Debug`
 
-You can call `Debug.drawText(text: String, xPos: Double, yPos: Double, color: ColorRGBA)` to place a string anywhere in the game world. This is only valid for one timestep, so you if you will need to call this method on every timestep on which you want the text to be displayed.
-
-E.g. if you wanted your drone's to display their position, you could use this code:
+You can display a string at the position of one of your drones using the `DroneController.showText(text: String)` method.
+This is only valid for one timestep, so you if you will need to call this method on every timestep on which you want the text to be displayed.
+E.g. if you wanted your drones to display their position, you could use this code:
 
     override def onTick(): Unit = {
-      Debug.drawText(position.toString, position.x, position.y, ColorRGBA(1, 1, 1, 1))
+      showText(position.toString)
     }
+
+There is also a more general method `Debug.drawText(text: String, xPos: Double, yPos: Double, color: ColorRGBA)` that places a string anywhere in the game world.
+
+[API#DroneController]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.DroneController
+[API#Drone]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.Drone
+[API#Vector2]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.Vector2
+

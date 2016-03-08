@@ -8,7 +8,8 @@ If you encounter a bug, or have a question, or want to give feedback you can pos
 
 To get things set up, you need to create a new project in your favourite IDE (or whatever else you use) which imports [codecraft.jar](https://www.dropbox.com/s/axfrjijyuv7v1kg/codecraft-0.1.0.jar?dl=0).
 Alternatively, this repo also contains bare bones templates for Scala and Java in the folders scala-template and java-template.
-They can be run with from the command line with `sbt run` and `javac *.java -cp codecraft-0.1.0.jar && java -cp '.;codecraft-0.1.0.jar' Main` respectively.
+To run the Scala code from the command line, just type `sbt run`.
+Running the Java code can be done with `javac *.java -cp codecraft-0.1.0.jar && java -cp '.:codecraft-0.1.0.jar' Main` on Linux and `javac *.java -cp codecraft-0.1.0.jar && java -cp '.;codecraft-0.1.0.jar' Main` on Windows.
 
 The main entry point into the game is the TheGameMaster object.
 You can start the first level by calling TheGameMaster.runLevel1 as such:
@@ -77,8 +78,7 @@ In Scala, you can use a simpler variant of buildDrone that allows you to directl
 Add the following code to your Mothership class:
 
 ```scala
-override def onSpawn() =
-  buildDrone(new Harvester, storageModules = 2)
+override def onSpawn(): Unit = buildDrone(new Harvester, storageModules = 2)
 ```
 ```java
 @Override public void onSpawn() {
@@ -91,6 +91,7 @@ Of course we still need to implement the `Harvester`, so create a new file with 
 
 ```scala
 import cwinter.codecraft.core.api._
+import cwinter.codecraft.util.maths.Vector2
 import scala.util.Random
     
 class Harvester extends DroneController {
@@ -105,6 +106,7 @@ class Harvester extends DroneController {
 ```
 ```java
 import cwinter.codecraft.core.api.*;
+import cwinter.codecraft.util.maths.Vector2;
 import java.util.Random;
 
 class Harvester extends JDroneController {
@@ -171,26 +173,23 @@ class Harvester extends JDroneController {
     if (!isMoving() && !isHarvesting()) {
       if (availableStorage() == 0) moveTo(mothership);
       else {
-        Double randomDirection = Vector2(2 * Math.PI * rng.nextDouble());
-        Double targetPosition = position.plus(randomDirection.times(500));
+        Vector2 randomDirection = Vector2(2 * Math.PI * rng.nextDouble());
+        Vector2 targetPosition = position.plus(randomDirection.times(500));
         moveTo(targetPosition);
       }
     }
   }
 
-  // whe we see a mineral crystal, stop scouting and move towards it
   @Override public void onMineralEntersVision(MineralCrystal mineral) {
     if (availableStorage() > 0) moveTo(mineral);
   }
 
-  // once we arrive at the mineral, harvest it and bring it back to the mothership
   @Override public void onArrivesAtMineral(MineralCrystal mineral) {
     harvest(mineral);
   }
 
-  // once we arrive at the mothership, deposit the crystal and switch back to scouting mode
   @Override public void onArrivesAtDrone(Drone drone) {
-    giveResourcesTo(mothership);
+    giveResourcesTo(drone);
   }
 }
 ```
@@ -227,14 +226,14 @@ If you run your program again now, you should see a growing armada of harvesters
 Now that you have laid the economic foundations for your drone empire, it is time to start thinking about how to beat your opponent.
 By now you probably got the hang of how CodeCraft works, so I will just give you a high level overview of how to implement your army.
 After you have built some harvesters, you will want to start production on a different type of drone.
-The HarvesterSpec won't do for this, you will need to define another spec without `storageModules` which instead has one or more `missileBatteries`, and maybe even `shieldGenerators` (if you are using Java, those correspond to the 2nd and 6th argument of the DroneSpec constructor respectively).
-Another controller will be required as well, and you might find the following methods useful:
+Instead of `storageModules`, it should be equipped with one or more `missileBatteries` and maybe even `shieldGenerators`.
+Another controller will be required as well, and you will find the following methods useful:
 
 * The `DroneController` method `dronesInSight` returns a `Set` of all `Drone`s which can be seen by this drone controller
 * The `Drone` class has a method `isEnemy` which tells you whether that drone is an enemy
 * The `DroneController` method `isInMissileRange(target: Drone)` can be used to check whether some drone is within the range of your missiles
 * The `DroneController` method `fireMissilesAt(target: Drone)` will fire all your missiles at the drone `target`
-* If you are using Java: method parentheses aren't optional in Java, so you will need to write e.g. `dronesInSight()` and `isEnemy()`
+* If you are using Java method parentheses aren't optional, so you will need to write e.g. `dronesInSight()` and `isEnemy()`
 
 If you don't quite manage to get all of this to work, you can check out the scala-solution and java-solution directories in this repo, which contain a full implementation of everything described in this tutorial.
 If you want to go even further, check out the next section which gives an overview of all the other parts of the API which haven't been covered yet.

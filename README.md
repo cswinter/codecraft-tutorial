@@ -1,8 +1,8 @@
-# CodeCraft Tutorial
+# CodeCraft Tutorial [![Join the chat at https://gitter.im/cswinter/CodeCraftGame](https://badges.gitter.im/cswinter/CodeCraftGame.svg)](https://gitter.im/cswinter/CodeCraftGame?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 This is a tutorial which describes how to implement an AI for the programming game CodeCraft.
 You "play" CodeCraft by writing a program in Scala or Java and I am going to assume that you are already familiar with one of these languages.
-If you encounter a bug, or have a question, or want to give feedback you can post to this [Google group](https://groups.google.com/forum/#!forum/codecraftgame) or send me an email at codecraftgame@gmail.com.
+If you encounter a bug, or have a question, or want to give feedback you go on [Gitter](https://gitter.im/cswinter/CodeCraftGame) or send me an email at codecraftgame@gmail.com.
 
 ## Basics
 

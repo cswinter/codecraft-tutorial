@@ -248,7 +248,7 @@ In addtiion to that, this section gives a quick overview of the most useful part
 
 ### `TheGameMaster`
 To configure and start the game, you use `TheGameMaster` object.
-`TheGameMaster` has methods `runLevel1`, `runLevel2`, and `runLevel3` which take as an argument the `DroneController` for your mothership and start the corresponding level.
+`TheGameMaster` has methods `runLevel1`, `runLevel2`, ..., `runLevel7` which take as an argument the `DroneController` for your mothership and start the corresponding level.
 There is also a `runGame` method which allows you to start a game with two custom `DroneController`s.
 The game automatically records replays of all games in the folder `~/.codecraft/replays`.
 You can run the last recorded replay using `runLastReplay` and run the replay with a specific filename using `runReplay`.
@@ -281,7 +281,7 @@ E.g. if you wanted your drones to display their position, you could use this cod
       showText(position.toString)
     }
 
-There is also a more general method `Debug.drawText(text: String, xPos: Double, yPos: Double, color: ColorRGBA)` that places a string anywhere in the game world.
+There is also a more general method `cwinter.codecraft.graphics.engine.Debug.drawText(text: String, xPos: Double, yPos: Double, color: ColorRGBA)` that places a string anywhere in the game world.
 
 [API#DroneController]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.DroneController
 [API#Drone]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.Drone

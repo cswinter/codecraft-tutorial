@@ -1,4 +1,4 @@
-# CodeCraft Tutorial [![Join the chat at https://gitter.im/cswinter/CodeCraftGame](https://badges.gitter.im/cswinter/CodeCraftGame.svg)](https://gitter.im/cswinter/CodeCraftGame?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# CodeCraft Tutorial [![Join the chat at https://gitter.im/cswinter/CodeCraftGame](https://badges.gitter.im/cswinter/CodeCraftGame.svg)](https://gitter.im/cswinter/CodeCraftGame?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.codecraftgame/codecraft_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.codecraftgame/codecraft_2.11)
 
 This is a tutorial which describes how to implement an AI for the programming game CodeCraft.
 You "play" CodeCraft by writing a program in Scala or Java and I am going to assume that you are already familiar with one of these languages.
@@ -6,10 +6,11 @@ If you encounter a bug, or have a question, or want to give feedback you go on [
 
 ## Basics
 
-To get things set up, you need to create a new project in your favourite IDE (or whatever else you use) which imports [codecraft.jar](https://www.dropbox.com/s/axfrjijyuv7v1kg/codecraft-0.1.0.jar?dl=0).
-Alternatively, this repo also contains bare bones templates for Scala and Java in the folders scala-template and java-template.
+To get things set up, you need to create a new project and add the [CodeCraft library](http://search.maven.org/#artifactdetails%7Corg.codecraftgame%7Ccodecraft_2.11%7C0.3.0.0%7C) as a dependency (in sbt: `libraryDependencies += "org.codecraftgame" % "codecraft_2.11" % "0.3.0.0"`).
+Alternatively, you can also download CodeCraft as a [fat jar](https://www.dropbox.com/s/bpel1bix3wofvd7/codecraft-0.3.0.0.jar?dl=0).
+This repo already contains bare bones templates for Scala and Java in the folders scala-template and java-template.
 To run the Scala code from the command line, just type `sbt run`.
-Running the Java code can be done with `javac *.java -cp codecraft-0.1.0.jar && java -cp '.:codecraft-0.1.0.jar' Main` on Linux and `javac *.java -cp codecraft-0.1.0.jar && java -cp '.;codecraft-0.1.0.jar' Main` on Windows.
+Running the Java code can be done with `javac *.java -cp codecraft-0.3.0.0.jar && java -cp '.:codecraft-0.3.0.0.jar' Main` on Linux and `javac *.java -cp codecraft-0.3.0.0.jar && java -cp '.;codecraft-0.3.0.0.jar' Main` on Windows.
 
 The main entry point into the game is the TheGameMaster object.
 You can start the first level by calling TheGameMaster.runLevel1 as such:

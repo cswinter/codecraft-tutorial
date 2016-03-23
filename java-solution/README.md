@@ -1,0 +1,1 @@
+Running this code can be done with `javac *.java -cp codecraft-0.3.0.0.jar && java -cp '.:codecraft-0.3.0.0.jar' Main` on Linux and `javac *.java -cp codecraft-0.3.0.0.jar && java -cp '.;codecraft-0.3.0.0.jar' Main` on Windows.

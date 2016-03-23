@@ -2,18 +2,16 @@
 
 This is a tutorial which describes how to implement an AI for the programming game CodeCraft.
 You "play" CodeCraft by writing a program in Scala or Java and I am going to assume that you are already familiar with one of these languages.
-If you encounter a bug, or have a question, or want to give feedback you go on [Gitter](https://gitter.im/cswinter/CodeCraftGame) or send me an email at codecraftgame@gmail.com.
+If you encounter a bug, have a question, or want to give feedback you can go on [Gitter](https://gitter.im/cswinter/CodeCraftGame) or send me an email at codecraftgame@gmail.com.
 
 ## Basics
 
 To get things set up, you need to create a new project and add the [CodeCraft library](http://search.maven.org/#artifactdetails%7Corg.codecraftgame%7Ccodecraft_2.11%7C0.3.0.0%7C) as a dependency (in sbt: `libraryDependencies += "org.codecraftgame" % "codecraft_2.11" % "0.3.0.0"`).
 Alternatively, you can also download CodeCraft as a [fat jar](https://www.dropbox.com/s/bpel1bix3wofvd7/codecraft-0.3.0.0.jar?dl=0).
-This repo already contains bare bones templates for Scala and Java in the folders scala-template and java-template.
-To run the Scala code from the command line, just type `sbt run`.
-Running the Java code can be done with `javac *.java -cp codecraft-0.3.0.0.jar && java -cp '.:codecraft-0.3.0.0.jar' Main` on Linux and `javac *.java -cp codecraft-0.3.0.0.jar && java -cp '.;codecraft-0.3.0.0.jar' Main` on Windows.
+An implementation of the setup described in this section can be found in the folders scala-template and java-template.
 
-The main entry point into the game is the TheGameMaster object.
-You can start the first level by calling TheGameMaster.runLevel1 as such:
+The main entry point into the game is the `TheGameMaster` object.
+You can start the first level by calling `TheGameMaster.runLevel1` as such:
 
 ```scala
 import cwinter.codecraft.core.api._
@@ -60,7 +58,7 @@ As you can see, the Mothership class doesn't contain any code so your unit AI wo
 However, you should now be able to run the program.
 If everything works correctly, you will see a window that displays the game world.
 The camera is initially centered on your mothership, which looks like a septagon with various shapes inside (its modules, more on that later).
-The green pentagons are mineral crystals, which can be harvested to gain more resources and construct new drones.
+The green pentagons are mineral crystals, which can be harvested to gain resources and construct additional drones.
 You can move your camera using the WASD keys and zoom in/out with Q and E.
 Somewhere to the left of your mothership you will find your orange opponent, who is already busy plotting your downfall.
 
@@ -238,7 +236,7 @@ Another controller will be required as well, and you will find the following met
 
 If you don't quite manage to get all of this to work, you can check out the scala-solution and java-solution directories in this repo, which contain a full implementation of everything described in this tutorial.
 If you want to go even further, check out the next section which gives an overview of all the other parts of the API which haven't been covered yet.
-If you write an AI that is different from those in the current levels, please send me a link to your code at codecraft@gmail.com and I'll include in the next release.
+If you write an AI that uses a different strategy than those in the current levels (or which beats all levels), please send me a link to your code at codecraft@gmail.com and I'll include in the next release.
 
 
 ## What to do next

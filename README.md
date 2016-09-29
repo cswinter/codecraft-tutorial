@@ -302,4 +302,4 @@ E.g. if you wanted your drones to display their position, you could use this cod
 [API#DroneController]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.DroneController
 [API#Drone]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.Drone
 [API#Vector2]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.Vector2
-[API#Multiplayer]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.TheGameMaster$@replicatorAI(greedy:Boolean,confident:Boolean,aggressive:Boolean):cwinter.codecraft.core.api.DroneControllerBase
+[API#Multiplayer]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.TheGameMaster$@prepareMultiplayerGame(serverAddress:String,controller:cwinter.codecraft.core.api.DroneControllerBase):scala.concurrent.Future[cwinter.codecraft.core.game.DroneWorldSimulator]$

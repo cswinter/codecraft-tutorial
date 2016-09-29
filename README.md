@@ -252,7 +252,7 @@ The game automatically records replays of all games in the folder `~/.codecraft/
 You can run the last recorded replay using `runLastReplay` and run the replay with a specific filename using `runReplay`.
 
 ### Multiplayer
-You can start a multiplayer game using [`TheGameMaster.prepareMultiplayerGame`][API#Multiplayer]. This returns a Future[DroneSimulator] which completes as soon as another player connects to the same server:
+You can start a multiplayer game using [`TheGameMaster.prepareMultiplayerGame`][API#Multiplayer]. This returns a `Future[DroneSimulator]` which completes as soon as another player connects to the same server:
 
 ```scala
 import cwinter.codecraft.core.api._

@@ -251,6 +251,26 @@ There is also a `runGame` method which allows you to start a game with two custo
 The game automatically records replays of all games in the folder `~/.codecraft/replays`.
 You can run the last recorded replay using `runLastReplay` and run the replay with a specific filename using `runReplay`.
 
+### Multiplayer
+You can start a multiplayer game using [`TheGameMaster.prepareMultiplayerGame`][API#Multiplayer]. This returns a Future[DroneSimulator] which completes as soon as another player connects to the same server:
+
+```scala
+import cwinter.codecraft.core.api._
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
+
+object Main {
+  def main(args: Array[String]): Unit = {
+    val game = Await.result(
+      TheGameMaster.prepareMultiplayerGame("www.codecraftgame.org", new Mothership), 10.minutes)
+    TheGameMaster.run(game)
+  }
+}
+
+```
+
 ### `DroneController`
 Almost all interactions with the game world goes through this class.
 If you are using Java, you should use the `JDroneController` class instead, which is almost identical but returns Java collections rather than their Scala counterparts.
@@ -282,4 +302,4 @@ E.g. if you wanted your drones to display their position, you could use this cod
 [API#DroneController]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.DroneController
 [API#Drone]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.Drone
 [API#Vector2]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.Vector2
-
+[API#Multiplayer]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.TheGameMaster$@replicatorAI(greedy:Boolean,confident:Boolean,aggressive:Boolean):cwinter.codecraft.core.api.DroneControllerBase

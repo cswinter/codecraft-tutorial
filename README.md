@@ -6,8 +6,7 @@ If you encounter a bug, have a question, or want to give feedback you can go on 
 
 ## Basics
 
-To get things set up, you need to create a new project and add the [CodeCraft library](http://search.maven.org/#artifactdetails%7Corg.codecraftgame%7Ccodecraft_2.11%7C0.3.0.0%7C) as a dependency (in sbt: `libraryDependencies += "org.codecraftgame" % "codecraft_2.11" % "0.3.0.0"`).
-Alternatively, you can also download CodeCraft as a [fat jar](https://www.dropbox.com/s/bpel1bix3wofvd7/codecraft-0.3.0.0.jar?dl=0).
+To get things set up, you need to create a new project and add the [CodeCraft library](http://search.maven.org/#artifactdetails%7Corg.codecraftgame%7Ccodecraft_2.11%7C0.6.0%7C) as a dependency (in sbt: `libraryDependencies += "org.codecraftgame" % "codecraft_2.11" % "0.6.0"`).
 An implementation of the setup described in this section can be found in the folders scala-template and java-template.
 
 The main entry point into the game is the `TheGameMaster` object.
@@ -272,15 +271,13 @@ Details can be found in the [API reference][API#Vector2].
 
 ### `Debug`
 
-You can display a string at the position of one of your drones using the `DroneController.showText(text: String)` method.
+You can display a string at any position in the game world by using the `DroneController.showText(text: String, position: Vector2)` method.
 This is only valid for one timestep, so you if you will need to call this method on every timestep on which you want the text to be displayed.
 E.g. if you wanted your drones to display their position, you could use this code:
 
     override def onTick(): Unit = {
-      showText(position.toString)
+      showText(position.toString, position)
     }
-
-There is also a more general method `cwinter.codecraft.graphics.engine.Debug.drawText(text: String, xPos: Double, yPos: Double, color: ColorRGBA)` that places a string anywhere in the game world.
 
 [API#DroneController]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.DroneController
 [API#Drone]: http://codecraftgame.org/docs/api/index.html#cwinter.codecraft.core.api.Drone

@@ -264,12 +264,14 @@ import scala.concurrent.duration._
 object Main {
   def main(args: Array[String]): Unit = {
     val game = Await.result(
-      TheGameMaster.prepareMultiplayerGame("www.codecraftgame.org", new Mothership), 10.minutes)
+      TheGameMaster.prepareMultiplayerGame("SERVER ADDRESS", new Mothership), 10.minutes)
     TheGameMaster.run(game)
   }
 }
 
 ```
+
+You can run a server by calling `cwinter.codecraft.core.multiplayer.Server.start()`.
 
 ### `DroneController`
 Almost all interactions with the game world goes through this class.
